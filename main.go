@@ -1,23 +1,25 @@
 package main
 
 import (
-	"myapp/controllers"
+	"context"
 
+	"github.com/ali-ghn/go-shop/controllers"
+	"github.com/ali-ghn/go-shop/repositories"
 	"github.com/labstack/echo/v4"
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var client *mongo.Client
+
+func init() {
+	client, _ = mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
+}
 
 func main() {
 	e := echo.New()
-	pc := controllers.NewProductController(getSession())
-	e.POST("/product", pc.CreateProduct)
-	e.Logger.Fatal(e.Start(":8081"))
-}
-
-func getSession() *mgo.Session {
-	session, err := mgo.Dial("mongodb://localhost")
-	if err != nil {
-		panic(err)
-	}
-	return session
+	uc := controllers.NewUserController(repositories.NewUserRepository(client))
+	e.GET("/", controllers.Index)
+	e.POST("/user", uc.CreateUser)
+	e.Logger.Fatal(e.Start(":1323"))
 }
