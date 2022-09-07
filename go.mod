@@ -3,6 +3,7 @@ module github.com/ali-ghn/go-shop
 go 1.19
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/labstack/echo/v4 v4.8.0
 	go.mongodb.org/mongo-driver v1.10.1
 )

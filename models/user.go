@@ -5,10 +5,10 @@ import (
 )
 
 type User struct {
-	UserId    primitive.ObjectID
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-	Roles     []string
+	Id        primitive.ObjectID `json:"_id" bson:"_id"`
+	FirstName string             `json:"firstName"`
+	LastName  string             `json:"lastName"`
+	Email     string             `json:"email"`
+	Password  string             `json:"password"`
+	Roles     []string           `json:"roles"`
 }

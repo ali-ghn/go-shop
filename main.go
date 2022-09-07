@@ -21,5 +21,7 @@ func main() {
 	uc := controllers.NewUserController(repositories.NewUserRepository(client))
 	e.GET("/", controllers.Index)
 	e.POST("/user", uc.CreateUser)
-	e.Logger.Fatal(e.Start(":1323"))
+	e.PUT("/user", uc.UpdateUser)
+	e.GET("/user", uc.ReadUser)
+	e.Logger.Fatal(e.Start(":8081"))
 }
