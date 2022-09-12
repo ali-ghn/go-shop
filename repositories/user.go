@@ -18,6 +18,7 @@ type IUserRepository interface {
 	CreateUser(user *models.User) (*models.User, error)
 	ReadUser(id string) (*models.User, error)
 	UpdateUser(user *models.User) (*models.User, error)
+	ReadUserByEmail(email string) (*models.User, error)
 }
 
 func NewUserRepository(client *mongo.Client) *UserRepository {
@@ -58,4 +59,11 @@ func (ur UserRepository) UpdateUser(user *models.User) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (ur UserRepository) ReadUserByEmail(email string) (*models.User, error) {
+	filter := bson.D{{"email", email}}
+	user := models.User{}
+	err := ur.client.Database(DatabaseName).Collection(UserCollectionName).FindOne(context.TODO(), filter).Decode(&user)
+	return &user, err
 }

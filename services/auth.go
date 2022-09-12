@@ -2,10 +2,14 @@ package services
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
+
+type IAuth interface {
+	CreateToken(c *UserClaim) (string, error)
+	ParseToken(signedToken string) (*UserClaim, error)
+}
 
 type Auth struct {
 	AuthKey []byte
@@ -13,19 +17,7 @@ type Auth struct {
 
 type UserClaim struct {
 	jwt.StandardClaims
-	SessionId int64
-}
-
-func (u *UserClaim) Valid() error {
-	if !u.VerifyExpiresAt(time.Now().Unix(), true) {
-		return fmt.Errorf("token has expired")
-	}
-
-	if u.SessionId == 0 {
-		return fmt.Errorf("invalid session Id")
-	}
-
-	return nil
+	Email string
 }
 
 func (a Auth) CreateToken(c *UserClaim) (string, error) {

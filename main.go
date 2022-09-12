@@ -5,6 +5,7 @@ import (
 
 	"github.com/ali-ghn/go-shop/controllers"
 	"github.com/ali-ghn/go-shop/repositories"
+	"github.com/ali-ghn/go-shop/services"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,10 +19,13 @@ func init() {
 
 func main() {
 	e := echo.New()
-	uc := controllers.NewUserController(repositories.NewUserRepository(client))
+	uc := controllers.NewUserController(repositories.NewUserRepository(client), services.Auth{
+		AuthKey: []byte("Some Random Key"),
+	})
 	e.GET("/", controllers.Index)
 	e.POST("/user", uc.CreateUser)
 	e.PUT("/user", uc.UpdateUser)
 	e.GET("/user", uc.ReadUser)
+	e.POST("/SignIn", uc.SignIn)
 	e.Logger.Fatal(e.Start(":8081"))
 }
