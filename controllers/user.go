@@ -29,6 +29,7 @@ func (uc UserController) CreateUser(c echo.Context) error {
 	c.Bind(&user)
 	// TODO: Change password storage procedure
 	// Use encryption and hash function
+	// TODO: Add email checking for duplicate emails
 	if user.Email == "" || user.Password == "" {
 		return c.String(http.StatusBadRequest, "Please make sure you have entered email and password")
 	}
@@ -78,6 +79,35 @@ func (uc UserController) ReadUser(c echo.Context) error {
 }
 
 func (uc UserController) UpdateUser(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+	if token == "" {
+		return c.String(http.StatusForbidden, "You don't have access to this endpoint")
+	}
+	claims, err := uc.auth.ParseToken(token)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusBadRequest, "Error while authorizing")
+	}
+
+	currentUser, err := uc.ur.ReadUserByEmail(claims.Email)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, "Something went wrong, please try again")
+	}
+
+	var isAuthorized bool
+
+	for _, v := range currentUser.Roles {
+		if v == "Admin" {
+			isAuthorized = true
+		}
+	}
+	if !isAuthorized {
+		return c.String(http.StatusForbidden, "You don't have access to this endpoint")
+
+	}
+
 	user := models.User{}
 	c.Bind(&user)
 	newUser, err := uc.ur.UpdateUser(&user)
