@@ -40,10 +40,38 @@ func (uc UserController) CreateUser(c echo.Context) error {
 }
 
 func (uc UserController) ReadUser(c echo.Context) error {
+	token := c.Request().Header.Get("Authorization")
+	if token == "" {
+		return c.String(http.StatusForbidden, "You don't have access to this endpoint")
+	}
+	claims, err := uc.auth.ParseToken(token)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusBadRequest, "Error while authorizing")
+	}
+
+	currentUser, err := uc.ur.ReadUserByEmail(claims.Email)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, "Something went wrong, please try again")
+	}
+
+	var isAuthorized bool
+
+	for _, v := range currentUser.Roles {
+		if v == "Admin" {
+			isAuthorized = true
+		}
+	}
+	if !isAuthorized {
+		return c.String(http.StatusForbidden, "You don't have access to this endpoint")
+
+	}
 	id := c.QueryParam("id")
 	user, err := uc.ur.ReadUser(id)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "Something went wrong, please try again")
 	}
 	return c.JSON(http.StatusOK, user)

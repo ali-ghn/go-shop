@@ -31,7 +31,7 @@ func (a Auth) CreateToken(c *UserClaim) (string, error) {
 
 func (a Auth) ParseToken(signedToken string) (*UserClaim, error) {
 	t, err := jwt.ParseWithClaims(signedToken, &UserClaim{}, func(t *jwt.Token) (interface{}, error) {
-		if t.Method.Alg() != jwt.SigningMethodES512.Alg() {
+		if t.Method.Alg() != jwt.SigningMethodHS512.Alg() {
 			return nil, fmt.Errorf("invalid signature algorithm")
 		}
 		return a.AuthKey, nil
