@@ -18,7 +18,7 @@ type UserClaim struct {
 
 func (u *UserClaim) Valid() error {
 	if !u.VerifyExpiresAt(time.Now().Unix(), true) {
-		return fmt.Errorf("Token has expired")
+		return fmt.Errorf("token has expired")
 	}
 
 	if u.SessionId == 0 {
@@ -35,4 +35,20 @@ func (a Auth) CreateToken(c *UserClaim) (string, error) {
 		return "", fmt.Errorf("error while signing")
 	}
 	return jt, nil
+}
+
+func (a Auth) ParseToken(signedToken string) (*UserClaim, error) {
+	t, err := jwt.ParseWithClaims(signedToken, &UserClaim{}, func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != jwt.SigningMethodES512.Alg() {
+			return nil, fmt.Errorf("invalid signature algorithm")
+		}
+		return a.AuthKey, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error in ParseToken while parsing token: %w", err)
+	}
+	if !t.Valid {
+		return nil, fmt.Errorf("error in ParseToken, token is not valid")
+	}
+	return t.Claims.(*UserClaim), nil
 }
