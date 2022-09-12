@@ -22,10 +22,12 @@ func main() {
 	uc := controllers.NewUserController(repositories.NewUserRepository(client), services.Auth{
 		AuthKey: []byte("Some Random Key"),
 	})
+	pc := controllers.NewProductController(repositories.NewProductRepository(client))
 	e.GET("/", controllers.Index)
 	e.POST("/user", uc.CreateUser)
 	e.PUT("/user", uc.UpdateUser)
 	e.GET("/user", uc.ReadUser)
 	e.POST("/SignIn", uc.SignIn)
+	e.POST("/product", pc.CreateProduct)
 	e.Logger.Fatal(e.Start(":8081"))
 }
